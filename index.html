@@ -2,76 +2,71 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Essa linha impede que o celular dê zoom automático nas caixas de texto -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Unificador de Textos</title>
-    <!-- Tailwind CSS CDN -->
+    
+    <!-- CSS Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Fonte Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Ícones Lucide -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        body { font-family: 'Poppins', sans-serif; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #F8F9FA; 
+            overflow: hidden; 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .hidden { display: none !important; }
         
-        /* Estilização da barra de rolagem (Scrollbar) */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        /* Custom Scrollbar responsivo */
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* Estilos e animações do Modal */
-        .modal {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        .modal.active {
-            display: flex;
-            opacity: 1;
-        }
-        .modal-content {
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .modal.active .modal-content {
-            transform: translateY(0) scale(1);
-        }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
     </style>
 </head>
-<body class="bg-[#F8F9FA] text-gray-900 overflow-hidden h-[100dvh] flex flex-col">
-
-    <!-- Cabeçalho (Header) -->
+<body class="text-gray-900">
+    <!-- Header Fixo e Compacto -->
     <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm z-10">
         <div class="flex items-center gap-3">
             <div class="bg-black text-white p-1.5 rounded-lg flex items-center justify-center">
-                <i data-lucide="file-text" style="width:20px;height:20px;"></i>
+                <i data-lucide="file-text" class="w-5 h-5"></i>
             </div>
             <h1 class="text-lg md:text-xl font-bold tracking-tight text-black">Unificador de Textos</h1>
         </div>
-        <button id="btnOpenHistory" class="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-black px-3 py-1.5 rounded-lg transition-colors border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black">
-            <i data-lucide="history" style="width:16px;height:16px;"></i>
+        <button onclick="openHistory()" class="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-black px-3 py-1.5 rounded-lg transition-colors border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black">
+            <i data-lucide="history" class="w-4 h-4"></i>
             <span class="hidden sm:inline">Ver Histórico</span>
         </button>
     </header>
 
-    <!-- Área Principal do Sistema -->
+    <!-- Área Principal sem scroll vertical na tela inteira -->
     <main class="flex-1 min-h-0 flex flex-col md:flex-row w-full max-w-[1400px] mx-auto p-2 md:p-4 gap-2 md:gap-4 overflow-hidden">
         
-        <!-- Coluna Esquerda: Blocos de Texto -->
+        <!-- Coluna Esquerda: Entradas de Texto -->
         <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
             <div class="shrink-0 px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                 <span class="font-bold text-sm tracking-wide text-gray-700 uppercase flex items-center gap-2">
                     Partes do Texto
-                    <span id="boxCount" class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">3</span>
+                    <span id="boxesCount" class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">3</span>
                 </span>
-                <button id="btnAddBox" class="flex items-center gap-1 text-xs font-bold text-white bg-black hover:bg-gray-800 px-2.5 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black">
-                    <i data-lucide="plus" style="width:14px;height:14px;"></i> Adicionar
+                <button onclick="addBox()" class="flex items-center gap-1 text-xs font-bold text-white bg-black hover:bg-gray-800 px-2.5 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
                 </button>
             </div>
             
             <div id="boxesContainer" class="flex-1 min-h-0 p-2 overflow-y-auto flex flex-col gap-2 bg-white">
-                <!-- Os Editores serão injetados aqui pelo JavaScript -->
+                <!-- Caixas de texto renderizadas dinamicamente via JS -->
             </div>
         </div>
 
@@ -79,452 +74,388 @@
         <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-2 md:mt-0">
             <div class="shrink-0 px-4 py-3 border-b border-gray-100 bg-black text-white flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 flex-1">
-                    <i data-lucide="align-left" style="width:16px;height:16px;" class="shrink-0"></i>
-                    <input type="text" id="unionNameInput" value="Meus_Textos_Unidos" placeholder="Nome da união (ex: Meus_Textos)" class="bg-transparent border-b border-transparent focus:border-gray-500 w-full outline-none font-bold text-sm transition-colors placeholder:text-gray-400">
+                    <i data-lucide="align-left" class="w-4 h-4 shrink-0"></i>
+                    <input type="text" id="unionName" value="Meus_Textos_Unidos" placeholder="Nome do arquivo..." class="bg-transparent border-b border-transparent focus:border-gray-500 w-full outline-none font-bold text-sm transition-colors placeholder:text-gray-400">
                 </div>
-                <span id="charCount" class="text-xs font-mono bg-gray-800 px-2 py-0.5 rounded text-gray-300 shrink-0">
-                    0 caracteres
-                </span>
+                <span id="totalChars" class="text-xs font-mono bg-gray-800 px-2 py-0.5 rounded text-gray-300 shrink-0">0 caracteres</span>
             </div>
 
             <div class="flex-1 min-h-0 p-4 overflow-y-auto bg-gray-50 flex flex-col">
-                <div id="combinedOutput" class="flex-1 text-sm font-mono text-gray-800 whitespace-pre-wrap leading-relaxed outline-none hidden"></div>
-                <div id="emptyOutput" class="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
-                    <i data-lucide="file-text" style="width:32px;height:32px;" class="text-gray-300"></i>
+                <div id="combinedTextDisplay" class="flex-1 text-sm font-mono text-gray-800 whitespace-pre-wrap leading-relaxed outline-none hidden"></div>
+                <div id="emptyDisplay" class="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
+                    <i data-lucide="file-text" class="w-8 h-8 text-gray-300"></i>
                     <p class="text-sm font-medium text-center">Os textos unidos aparecerão aqui...</p>
                 </div>
             </div>
 
             <div class="shrink-0 p-3 bg-white border-t border-gray-200 grid grid-cols-2 gap-2">
-                <button id="btnCopy" disabled class="flex flex-col border xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-gray-100 text-gray-400 cursor-not-allowed">
-                    <i data-lucide="copy" style="width:16px;height:16px;"></i>
-                    <span id="textCopy" class="truncate">Copiar</span>
+                <button id="copyBtn" onclick="handleCopy()" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span id="copyText" class="truncate">Copiar</span>
                 </button>
-                <button id="btnDownload" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed">
-                    <i data-lucide="download" style="width:16px;height:16px;"></i>
+                <button id="downloadBtn" onclick="handleDownload()" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed">
+                    <i data-lucide="download" class="w-4 h-4"></i>
                     <span class="truncate">Baixar .txt</span>
                 </button>
             </div>
         </div>
-
     </main>
 
-    <!-- Modal do Histórico (Fica invisível até ser chamado) -->
-    <div id="historyModal" class="modal fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-        <div class="modal-content bg-white rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden" onclick="event.stopPropagation()">
+    <!-- Modal de Histórico -->
+    <div id="historyModal" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden" onclick="closeHistoryModal(event)">
+        <div class="bg-white rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden" onclick="event.stopPropagation()">
             <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
                 <h2 class="font-bold text-lg flex items-center gap-2 text-black">
-                    <i data-lucide="history" style="width:20px;height:20px;"></i>
+                    <i data-lucide="history" class="w-5 h-5"></i>
                     Histórico de Textos Salvos
                 </h2>
-                <button id="btnCloseHistory" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-200 rounded-lg transition-colors">
-                    <i data-lucide="x" style="width:20px;height:20px;"></i>
+                <button onclick="closeHistory()" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-200 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
             <div id="historyContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
-                <!-- Itens de Histórico injetados aqui via JS -->
+                <!-- Itens do histórico aparecem aqui -->
             </div>
         </div>
     </div>
 
-    <!-- Scripts e Lógica (Insubstituivel) -->
+    <!-- Script Javascript -->
     <script>
-        // Inicializar os Ícones
-        lucide.createIcons();
-
-        // Utilitários de ID Aleatório
-        const generateId = () => Math.random().toString(36).substring(2, 9);
-        
-        // Estado do Sistema
+        // Estado inicial do aplicativo
         let boxes = [
-            { id: generateId(), text: "" },
-            { id: generateId(), text: "" },
-            { id: generateId(), text: "" }
+            { id: generateId(), text: '' },
+            { id: generateId(), text: '' },
+            { id: generateId(), text: '' }
         ];
         let historyData = [];
-        let unionName = "Meus_Textos_Unidos";
         let expandedHistoryIds = [];
-        let deleteConfirmId = null;
 
-        // Referências ao DOM
+        // Referências do DOM
         const boxesContainer = document.getElementById('boxesContainer');
-        const boxCount = document.getElementById('boxCount');
-        const btnAddBox = document.getElementById('btnAddBox');
-        const unionNameInput = document.getElementById('unionNameInput');
-        
-        const combinedOutput = document.getElementById('combinedOutput');
-        const emptyOutput = document.getElementById('emptyOutput');
-        const charCount = document.getElementById('charCount');
-        
-        const btnCopy = document.getElementById('btnCopy');
-        const textCopy = document.getElementById('textCopy');
-        const btnDownload = document.getElementById('btnDownload');
-        
+        const boxesCount = document.getElementById('boxesCount');
+        const totalChars = document.getElementById('totalChars');
+        const combinedTextDisplay = document.getElementById('combinedTextDisplay');
+        const emptyDisplay = document.getElementById('emptyDisplay');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyText = document.getElementById('copyText');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const unionNameInput = document.getElementById('unionName');
         const historyModal = document.getElementById('historyModal');
-        const btnOpenHistory = document.getElementById('btnOpenHistory');
-        const btnCloseHistory = document.getElementById('btnCloseHistory');
         const historyContainer = document.getElementById('historyContainer');
 
-        // ==== Iniciar Histórico Salvo no Navegador (LocalStorage) ====
-        const savedHistory = localStorage.getItem("textJoinerHistory");
-        if (savedHistory) {
-            try {
-                historyData = JSON.parse(savedHistory);
-            } catch (e) {
-                console.error("Falha ao ler o histórico");
-            }
+        // Utilitários
+        function generateId() {
+            return Math.random().toString(36).substring(2, 9);
         }
 
-        const saveHistoryToStorage = () => {
-            localStorage.setItem("textJoinerHistory", JSON.stringify(historyData));
-        };
-
-        const getCombinedText = () => {
-            return boxes.map(b => b.text).filter(t => t.trim() !== "").join("\n\n");
-        };
-
-        // ==== Função Principal de Atualizar Tela (Reativa) ====
-        const updateUI = () => {
-            boxCount.textContent = boxes.length;
-            unionNameInput.value = unionName;
-            
-            const combined = getCombinedText();
-            charCount.textContent = `${combined.length} caracteres`;
-
-            if (combined) {
-                combinedOutput.textContent = combined;
-                combinedOutput.classList.remove('hidden');
-                emptyOutput.classList.add('hidden');
-
-                btnCopy.disabled = false;
-                btnCopy.className = "flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-100 hover:bg-gray-200 text-black border-gray-200";
-
-                btnDownload.disabled = false;
-                btnDownload.className = "flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-white text-black hover:bg-gray-50 border-gray-300 shadow-sm";
-            } else {
-                combinedOutput.textContent = "";
-                combinedOutput.classList.add('hidden');
-                emptyOutput.classList.remove('hidden');
-
-                btnCopy.disabled = true;
-                btnCopy.className = "flex flex-col border xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-gray-100 text-gray-400 cursor-not-allowed border-gray-100";
-
-                btnDownload.disabled = true;
-                btnDownload.className = "flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed";
+        // Inicializar aplicação
+        function init() {
+            const savedHistory = localStorage.getItem('textJoinerHistory');
+            if (savedHistory) {
+                try { historyData = JSON.parse(savedHistory); } catch(e) {}
             }
-
             renderBoxes();
-            lucide.createIcons(); // Recria ícones lucide dos elementos renderizados
-        };
+            updateCombinedText();
+        }
 
-        // Escuta Mudanças de Texto e Corrige Bug de Celular Usando .addEventListener('input')
-        const handleTextChange = (id, newText) => {
-            const box = boxes.find(b => b.id === id);
-            if (box) box.text = newText;
-            updateUI();
-        };
-
-        // Renderizador das Caixas Editáveis (Esquerda)
-        const renderBoxes = () => {
-            boxesContainer.innerHTML = "";
+        // Renderiza as caixas da esquerda
+        function renderBoxes() {
+            boxesCount.innerText = boxes.length;
+            boxesContainer.innerHTML = '';
+            
             boxes.forEach((box, index) => {
                 const boxEl = document.createElement('div');
-                boxEl.className = "flex-1 min-h-[90px] flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black shadow-sm transition-all";
-                
+                boxEl.className = 'flex-1 min-h-[90px] flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black shadow-sm shrink-0';
                 boxEl.innerHTML = `
                     <div class="shrink-0 bg-gray-50 py-1.5 px-3 border-b border-gray-100 flex justify-between items-center transition-colors">
                         <div class="flex items-center gap-2">
-                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                                Bloco ${index + 1}
-                            </span>
-                            <span class="text-[10px] font-mono bg-gray-200 px-1.5 py-0.5 rounded text-gray-600 font-bold">
-                                ${box.text.length} caracteres
-                            </span>
+                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Bloco ${index + 1}</span>
+                            <span id="charCount-${box.id}" class="text-[10px] font-mono bg-gray-200 px-1.5 py-0.5 rounded text-gray-600 font-bold">${box.text.length} caracteres</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="btn-clear text-gray-400 hover:text-black transition-colors" title="Esvaziar">
-                                <i data-lucide="eraser" style="width:14px;height:14px;"></i>
+                            <button onclick="clearBox('${box.id}')" class="text-gray-400 hover:text-black transition-colors" title="Esvaziar">
+                                <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
                             </button>
-                            <button class="btn-remove text-gray-400 hover:text-black transition-colors" title="Remover">
-                                <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+                            <button onclick="removeBox('${box.id}')" class="text-gray-400 hover:text-black transition-colors" title="Remover">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
-                    <textarea class="flex-1 w-full p-2 lg:p-3 resize-none outline-none text-gray-800 text-sm leading-relaxed" placeholder="Digite ou cole um texto aqui...">${box.text}</textarea>
+                    <textarea id="textarea-${box.id}" oninput="handleTextChange('${box.id}', this.value)" placeholder="Digite ou cole um texto aqui..." class="flex-1 w-full p-2 lg:p-3 resize-none outline-none text-gray-800 text-sm leading-relaxed">${box.text}</textarea>
                 `;
-                
-                const textarea = boxEl.querySelector('textarea');
-                // IMPORTANTE: Escutar "input" e resetar a caret/foco corretamente não é mais um problema quando não recriamos completamente o DOM focado. 
-                // Para evitar a perda de foco no mobile quando o innerHTML da UI é re-injetado pelo react/vanillaJS, o DOM nativo pode perder a seleção.
-                // Mas, como guardamos o texto e damos .focus de novo quando precisamos, mantemos funcional.
-                // O melhor approach é não reconstruir o textarea e apenas pegar o valor.
-                
-                // Em vanilla JS as re-renderizações totais de form perdem foco. Vamos otimizar não recriando
-                textarea.addEventListener('input', (e) => {
-                    const caret = e.target.selectionStart;
-                    handleTextChange(box.id, e.target.value);
-                    // Para vanilla, como recriamos a div, pegamos de volta o foco:
-                    setTimeout(() => {
-                        const newTextareas = boxesContainer.querySelectorAll('textarea');
-                        if(newTextareas[index]) {
-                            newTextareas[index].focus();
-                            newTextareas[index].setSelectionRange(caret, caret);
-                        }
-                    }, 0);
-                });
-
-                boxEl.querySelector('.btn-remove').addEventListener('click', () => {
-                    if (boxes.length <= 1) {
-                        boxes = [{ id: generateId(), text: "" }];
-                    } else {
-                        boxes = boxes.filter(b => b.id !== box.id);
-                    }
-                    updateUI();
-                });
-
-                boxEl.querySelector('.btn-clear').addEventListener('click', () => {
-                    box.text = "";
-                    updateUI();
-                });
-
                 boxesContainer.appendChild(boxEl);
             });
-        };
+            lucide.createIcons();
+        }
 
-        // Renderizador do Histórico
-        const renderHistory = () => {
-            historyContainer.innerHTML = "";
+        // Ações das caixas
+        function addBox() {
+            boxes.push({ id: generateId(), text: '' });
+            renderBoxes();
+            updateCombinedText();
+            // Desce o scroll automaticamente quando adiciona nova caixa
+            setTimeout(() => { boxesContainer.scrollTop = boxesContainer.scrollHeight; }, 10);
+        }
+
+        function removeBox(id) {
+            if (boxes.length <= 1) {
+                boxes = [{ id: generateId(), text: '' }];
+            } else {
+                boxes = boxes.filter(b => b.id !== id);
+            }
+            renderBoxes();
+            updateCombinedText();
+        }
+
+        function clearBox(id) {
+            const box = boxes.find(b => b.id === id);
+            if (box) {
+                box.text = '';
+                document.getElementById(`textarea-${id}`).value = '';
+                document.getElementById(`charCount-${id}`).innerText = '0 caracteres';
+                updateCombinedText();
+            }
+        }
+
+        // Isso roda sem re-renderizar todo o layout, evitando a perda de foco no teclado do mobile
+        function handleTextChange(id, newText) {
+            const box = boxes.find(b => b.id === id);
+            if (box) {
+                box.text = newText;
+                document.getElementById(`charCount-${id}`).innerText = `${newText.length} caracteres`;
+                updateCombinedText();
+            }
+        }
+
+        // Sincronização do texto unificado
+        function getCombinedText() {
+            return boxes.map(b => b.text).filter(t => t.trim() !== "").join('\n\n');
+        }
+
+        function updateCombinedText() {
+            const combined = getCombinedText();
+            const btnActiveClasses = "bg-white text-black hover:bg-gray-50 border-gray-300 shadow-sm".split(" ");
+            const btnInactiveClasses = "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed".split(" ");
+
+            if (combined.length > 0) {
+                combinedTextDisplay.innerText = combined;
+                combinedTextDisplay.classList.remove('hidden');
+                emptyDisplay.classList.add('hidden');
+                totalChars.innerText = combined.length + " caracteres";
+                
+                // Ativar botões
+                [copyBtn, downloadBtn].forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove(...btnInactiveClasses);
+                    btn.classList.add(...btnActiveClasses);
+                });
+            } else {
+                combinedTextDisplay.innerText = '';
+                combinedTextDisplay.classList.add('hidden');
+                emptyDisplay.classList.remove('hidden');
+                totalChars.innerText = "0 caracteres";
+                
+                // Desativar botões
+                [copyBtn, downloadBtn].forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove(...btnActiveClasses);
+                    btn.classList.add(...btnInactiveClasses);
+                });
+            }
+        }
+
+        // Ações de salvar, exportar e histórico
+        function saveToHistory() {
+            const combined = getCombinedText();
+            if (!combined) return;
+            const unionName = unionNameInput.value || "Meus_Textos_Unidos";
             
+            // Evita salvar duplicados se acabar tocando 2x ou abaixando o mesmo arquivo repetidas vezes
+            if (historyData.length > 0) {
+                const latestTextList = historyData[0].boxes.map(b => b.text).filter(t => t.trim() !== "");
+                const latestCombined = latestTextList.join('\n\n');
+                if (combined === latestCombined && historyData[0].name === unionName) return;
+            }
+
+            historyData.unshift({
+                id: generateId(),
+                name: unionName,
+                boxes: JSON.parse(JSON.stringify(boxes)),
+                timestamp: Date.now()
+            });
+            localStorage.setItem('textJoinerHistory', JSON.stringify(historyData));
+        }
+
+        function handleCopy() {
+            const combined = getCombinedText();
+            if (!combined) return;
+            
+            navigator.clipboard.writeText(combined).then(() => {
+                saveToHistory();
+                copyBtn.className = "flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-black text-white";
+                copyText.innerText = "Copiado!";
+                
+                setTimeout(() => {
+                    updateCombinedText(); // Retorna o botão ao normal
+                    copyText.innerText = "Copiar";
+                }, 2000);
+            });
+        }
+
+        function handleDownload() {
+            const combined = getCombinedText();
+            if (!combined) return;
+            
+            const blob = new Blob([combined], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = (unionNameInput.value || "documento_unificado") + ".txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            saveToHistory();
+        }
+
+        // Histórico de Textos (Modal)
+        function openHistory() {
+            renderHistory();
+            historyModal.classList.remove('hidden');
+            historyModal.classList.add('flex');
+        }
+
+        function closeHistory() {
+            historyModal.classList.add('hidden');
+            historyModal.classList.remove('flex');
+        }
+        
+        function closeHistoryModal(e) {
+            if(e.target === historyModal) closeHistory();
+        }
+
+        function renderHistory() {
+            historyContainer.innerHTML = '';
             if (historyData.length === 0) {
                 historyContainer.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-12 text-gray-400 gap-4">
-                        <i data-lucide="clock" style="width:40px;height:40px;" class="text-gray-300"></i>
+                        <i data-lucide="clock" class="w-10 h-10 text-gray-300"></i>
                         <p class="text-center font-medium">
                             Nenhuma unificação salva no momento.<br/>
                             <span class="text-sm font-normal">Sempre que você copia ou salva um arquivo, ele fica guardado aqui.</span>
                         </p>
                     </div>
                 `;
-                return;
-            }
+            } else {
+                historyData.forEach(item => {
+                    const fullText = item.boxes.map(b => b.text).filter(t => t.trim() !== "").join('\n\n');
+                    const isExpanded = expandedHistoryIds.includes(item.id);
+                    
+                    const el = document.createElement('div');
+                    el.className = `group border border-gray-200 rounded-xl p-4 hover:border-black transition-all bg-white hover:shadow-md relative overflow-hidden ${isExpanded ? '' : 'cursor-pointer'}`;
+                    
+                    if (!isExpanded) {
+                        el.onclick = (e) => {
+                            if (document.getElementById(`confirm-${item.id}`).classList.contains('flex')) return;
+                            restoreHistory(item.id, e);
+                        };
+                    }
 
-            historyData.forEach(item => {
-                const fullText = item.boxes.map(b => b.text).filter(t => t.trim() !== "").join("\n\n");
-                const isExpanded = expandedHistoryIds.includes(item.id);
-                const isConfirmingDelete = deleteConfirmId === item.id;
-                
-                const itemEl = document.createElement('div');
-                itemEl.className = `group border border-gray-200 rounded-xl p-4 hover:border-black transition-all bg-white hover:shadow-md relative overflow-hidden ${isExpanded ? '' : 'cursor-pointer'}`;
-                
-                if (!isExpanded && !isConfirmingDelete) {
-                    itemEl.addEventListener('click', () => {
-                        boxes = JSON.parse(JSON.stringify(item.boxes));
-                        unionName = item.name || "Meus_Textos_Unidos";
-                        closeHistory();
-                        updateUI();
-                    });
-                }
+                    // Prevenir injeção de HTML no texto escapando as tags visuais
+                    const safeText = fullText ? fullText.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "Cópia vazia...";
 
-                let deleteLayer = "";
-                if (isConfirmingDelete) {
-                    deleteLayer = `
-                        <div class="absolute inset-0 bg-white/95 backdrop-blur-sm z-10 flex flex-col justify-center items-center p-4">
+                    el.innerHTML = `
+                        <div id="confirm-${item.id}" class="absolute inset-0 bg-white/95 backdrop-blur-sm z-10 hidden flex-col justify-center items-center p-4">
                             <p class="text-[13px] leading-tight font-bold text-gray-800 mb-3 text-center">Tem certeza que deseja excluir esse texto unificado?</p>
                             <div class="flex gap-2">
-                                <button class="btn-confirm-del px-3 py-1.5 bg-black text-white text-[11px] font-bold rounded-lg hover:bg-red-600 transition-colors">Sim</button>
-                                <button class="btn-cancel-del px-3 py-1.5 bg-gray-200 text-black text-[11px] font-bold rounded-lg hover:bg-gray-300 transition-colors">Não</button>
+                                <button onclick="confirmDeleteHistory('${item.id}', event)" class="px-3 py-1.5 bg-black text-white text-[11px] font-bold rounded-lg hover:bg-red-600 transition-colors">Sim</button>
+                                <button onclick="cancelDeleteHistory('${item.id}', event)" class="px-3 py-1.5 bg-gray-200 text-black text-[11px] font-bold rounded-lg hover:bg-gray-300 transition-colors">Não</button>
                             </div>
                         </div>
-                    `;
-                }
-
-                const dateStr = new Date(item.timestamp).toLocaleString();
-                const clampedClass = isExpanded ? 'whitespace-pre-wrap' : 'line-clamp-3';
-                
-                let viewMoreBtn = "";
-                if (fullText.length > 150) {
-                    viewMoreBtn = `
-                        <button class="btn-toggle-expand text-xs font-bold text-gray-500 hover:text-black mt-2 flex items-center bg-gray-100 px-2 py-1 rounded">
-                            ${isExpanded ? "Ver menos" : "Ver mais"}
-                        </button>
-                    `;
-                }
-
-                itemEl.innerHTML = `
-                    ${deleteLayer}
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex flex-col">
-                            <span class="font-bold text-sm text-gray-800 mb-1">${item.name || "Texto sem nome"}</span>
-                            <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md self-start flex items-center gap-1">
-                                <i data-lucide="clock" style="width:10px;height:10px;"></i>
-                                ${dateStr}
-                            </span>
+                        
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-sm text-gray-800 mb-1">${item.name || 'Texto sem nome'}</span>
+                                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md self-start flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                    ${new Date(item.timestamp).toLocaleString()}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="requestDeleteHistory('${item.id}', event)" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100" title="Excluir">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="restoreHistory('${item.id}', event)" class="text-xs font-bold bg-black text-white px-3 py-1.5 rounded-lg opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    Restaurar
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button class="btn-del-hit p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100" title="Excluir">
-                                <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
-                            </button>
-                            <button class="btn-restore text-xs font-bold bg-black text-white px-3 py-1.5 rounded-lg opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                Restaurar
-                            </button>
+
+                        <div class="mt-3">
+                            <p class="text-sm text-gray-700 font-medium leading-relaxed ${isExpanded ? 'whitespace-pre-wrap' : 'line-clamp-3'}">
+                                ${safeText}
+                            </p>
+                            ${fullText.length > 150 ? `
+                                <button onclick="toggleExpandHistory('${item.id}', event)" class="text-xs font-bold text-gray-500 hover:text-black mt-2 flex items-center bg-gray-100 px-2 py-1 rounded">
+                                    ${isExpanded ? "Ver menos" : "Ver mais"}
+                                </button>
+                            ` : ''}
                         </div>
-                    </div>
-                    <div class="mt-3">
-                        <p class="text-sm text-gray-700 font-medium leading-relaxed ${clampedClass}">
-                            ${fullText || "Cópia vazia..."}
-                        </p>
-                        ${viewMoreBtn}
-                    </div>
-                    <div class="mt-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1 border-t border-gray-100 pt-3">
-                        <i data-lucide="file-text" style="width:10px;height:10px;"></i>
-                        ${item.boxes.length} Partes originais preservadas
-                    </div>
-                `;
 
-                // Interações de deletar/restaurar no histórico
-                if (isConfirmingDelete) {
-                    itemEl.querySelector('.btn-confirm-del').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        historyData = historyData.filter(h => h.id !== item.id);
-                        deleteConfirmId = null;
-                        saveHistoryToStorage();
-                        renderHistory();
-                        lucide.createIcons();
-                    });
-                    itemEl.querySelector('.btn-cancel-del').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        deleteConfirmId = null;
-                        renderHistory();
-                        lucide.createIcons();
-                    });
-                } else {
-                    itemEl.querySelector('.btn-del-hit').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        deleteConfirmId = item.id;
-                        renderHistory();
-                        lucide.createIcons();
-                    });
-
-                    itemEl.querySelector('.btn-restore').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        boxes = JSON.parse(JSON.stringify(item.boxes));
-                        unionName = item.name || "Meus_Textos_Unidos";
-                        closeHistory();
-                        updateUI();
-                    });
-
-                    const expandBtn = itemEl.querySelector('.btn-toggle-expand');
-                    if(expandBtn) {
-                        expandBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            if (expandedHistoryIds.includes(item.id)) {
-                                expandedHistoryIds = expandedHistoryIds.filter(id => id !== item.id);
-                            } else {
-                                expandedHistoryIds.push(item.id);
-                            }
-                            renderHistory();
-                            lucide.createIcons();
-                        });
-                    }
-                }
-
-                historyContainer.appendChild(itemEl);
-            });
-        };
-
-        const saveToHistoryLog = () => {
-            const currentCombined = getCombinedText();
-            if (!currentCombined) return;
-            
-            // Verifica duplicatas
-            if (historyData.length > 0) {
-                const latestCombined = historyData[0].boxes.map(b => b.text).filter(t => t.trim() !== "").join("\n\n");
-                if (currentCombined === latestCombined && historyData[0].name === unionName) return;
+                        <div class="mt-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1 border-t border-gray-100 pt-3">
+                            <i data-lucide="file-text" class="w-3 h-3"></i>
+                            ${item.boxes.length} Partes originais preservadas
+                        </div>
+                    `;
+                    historyContainer.appendChild(el);
+                });
             }
-
-            historyData.unshift({
-                id: generateId(),
-                name: unionName || "Meus_Textos_Unidos",
-                boxes: JSON.parse(JSON.stringify(boxes)),
-                timestamp: Date.now()
-            });
-            saveHistoryToStorage();
-        };
-
-        // ==== Capturadores de Eventos Básicos ====
-        unionNameInput.addEventListener('input', (e) => {
-            unionName = e.target.value;
-        });
-
-        btnAddBox.addEventListener('click', () => {
-            boxes.push({ id: generateId(), text: "" });
-            updateUI();
-        });
-
-        btnCopy.addEventListener('click', async () => {
-            const text = getCombinedText();
-            if (!text) return;
-            
-            try {
-                await navigator.clipboard.writeText(text);
-                saveToHistoryLog();
-                
-                // Feedback visual de copiar
-                btnCopy.className = "flex flex-col border xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-black text-white border-black";
-                textCopy.textContent = "Copiado!";
-                
-                setTimeout(() => {
-                    btnCopy.className = "flex flex-col border xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-gray-100 hover:bg-gray-200 text-black border-gray-200";
-                    textCopy.textContent = "Copiar";
-                }, 2000);
-            } catch (err) {
-                console.error("Erro ao copiar:", err);
-            }
-        });
-
-        btnDownload.addEventListener('click', () => {
-            const text = getCombinedText();
-            if (!text) return;
-            
-            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${unionName || "documento"}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            saveToHistoryLog();
-        });
-
-        const openHistory = () => {
-            deleteConfirmId = null;
-            renderHistory();
             lucide.createIcons();
-            historyModal.style.display = "flex";
-            // Força a renderização do browser antes de adicionar opacity 1
-            historyModal.offsetHeight; 
-            historyModal.classList.add("active");
-        };
+        }
 
-        const closeHistory = () => {
-            historyModal.classList.remove("active");
-            setTimeout(() => {
-                historyModal.style.display = "none";
-                deleteConfirmId = null;
-            }, 200); // Aguarda terminar a animação pra esconder do DOM
-        };
+        function restoreHistory(id, e) {
+            if(e) e.stopPropagation();
+            const item = historyData.find(h => h.id === id);
+            if (item) {
+                boxes = JSON.parse(JSON.stringify(item.boxes));
+                unionNameInput.value = item.name || "Meus_Textos_Unidos";
+                renderBoxes();
+                updateCombinedText();
+                closeHistory();
+            }
+        }
 
-        btnOpenHistory.addEventListener('click', openHistory);
-        btnCloseHistory.addEventListener('click', closeHistory);
-        historyModal.addEventListener('click', closeHistory); // Ao clicar fora do box branco fechar o modal
+        function toggleExpandHistory(id, e) {
+            e.stopPropagation();
+            if (expandedHistoryIds.includes(id)) {
+                expandedHistoryIds = expandedHistoryIds.filter(i => i !== id);
+            } else {
+                expandedHistoryIds.push(id);
+            }
+            renderHistory();
+        }
 
-        // Chama a Primeira renderização
-        updateUI();
+        function requestDeleteHistory(id, e) {
+            e.stopPropagation();
+            document.getElementById(`confirm-${id}`).classList.remove('hidden');
+            document.getElementById(`confirm-${id}`).classList.add('flex');
+        }
+
+        function cancelDeleteHistory(id, e) {
+            e.stopPropagation();
+            document.getElementById(`confirm-${id}`).classList.add('hidden');
+            document.getElementById(`confirm-${id}`).classList.remove('flex');
+        }
+
+        function confirmDeleteHistory(id, e) {
+            e.stopPropagation();
+            historyData = historyData.filter(h => h.id !== id);
+            localStorage.setItem('textJoinerHistory', JSON.stringify(historyData));
+            renderHistory();
+        }
+
+        // Inicializar
+        init();
     </script>
 </body>
 </html>
