@@ -1,434 +1,461 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unificador de Textos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body class="h-[100dvh] w-full flex flex-col bg-[#F8F9FA] overflow-hidden text-gray-900">
-
-  <!-- Header Fixo e Compacto -->
-  <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm z-10">
-    <div class="flex items-center gap-3">
-      <div class="bg-black text-white p-1.5 rounded-lg flex items-center justify-center">
-        <i data-lucide="file-text" class="w-5 h-5"></i>
-      </div>
-      <h1 class="text-lg md:text-xl font-bold tracking-tight text-black">Unificador de Textos</h1>
-    </div>
-    <button id="btn-open-history" class="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-black px-3 py-1.5 rounded-lg transition-colors border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black">
-      <i data-lucide="history" class="w-4 h-4"></i>
-      <span class="hidden sm:inline">Ver Histórico</span>
-    </button>
-  </header>
-
-  <!-- Área Principal -->
-  <main class="flex-1 min-h-0 flex flex-col md:flex-row w-full max-w-[1400px] mx-auto p-2 md:p-4 gap-2 md:gap-4 overflow-hidden">
+    <meta charset="UTF-8">
+    <!-- Essa linha impede que o celular dê zoom automático nas caixas de texto -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unificador de Textos</title>
     
-    <!-- Coluna Esquerda: Entradas de Texto -->
-    <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div class="shrink-0 px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-        <span class="font-bold text-sm tracking-wide text-gray-700 uppercase flex items-center gap-2">
-          Partes do Texto
-          <span id="box-count-badge" class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">3</span>
-        </span>
-        <button id="btn-add-box" class="flex items-center gap-1 text-xs font-bold text-white bg-black hover:bg-gray-800 px-2.5 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
-        </button>
-      </div>
-      
-      <div id="boxes-container" class="flex-1 min-h-0 p-2 overflow-y-auto flex flex-col gap-2 bg-white">
-        <!-- Rendered by JS -->
-      </div>
-    </div>
-
-    <!-- Coluna Direita: Resultado -->
-    <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-2 md:mt-0">
-      <div class="shrink-0 px-4 py-3 border-b border-gray-100 bg-black text-white flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 flex-1">
-          <i data-lucide="align-left" class="w-4 h-4 shrink-0"></i>
-          <input id="input-union-name" type="text" value="Meus_Textos_Unidos" placeholder="Nome da união (ex: Meus_Textos)" class="bg-transparent border-b border-transparent focus:border-gray-500 w-full outline-none font-bold text-sm transition-colors placeholder:text-gray-400">
-        </div>
-        <span id="combined-char-count" class="text-xs font-mono bg-gray-800 px-2 py-0.5 rounded text-gray-300 shrink-0">0 caracteres</span>
-      </div>
-
-      <div class="flex-1 min-h-0 p-4 overflow-y-auto bg-gray-50 flex flex-col">
-        <div id="combined-text-display" class="flex-1 text-sm font-mono text-gray-800 whitespace-pre-wrap leading-relaxed outline-none hidden"></div>
+    <!-- CSS Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonte Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #F8F9FA; 
+            overflow: hidden; 
+            height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .hidden { display: none !important; }
         
-        <div id="empty-state-display" class="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
-          <i data-lucide="file-text" class="w-8 h-8 text-gray-300"></i>
-          <p class="text-sm font-medium text-center">Os textos unidos aparecerão aqui...</p>
-        </div>
-      </div>
-
-      <div class="shrink-0 p-3 bg-white border-t border-gray-200 grid grid-cols-2 gap-2">
-        <button id="btn-copy" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-gray-100 text-gray-400 cursor-not-allowed">
-          <i data-lucide="copy" class="w-4 h-4"></i>
-          <span id="txt-copy" class="truncate">Copiar</span>
-        </button>
-        <button id="btn-download" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          <span class="truncate">Baixar .txt</span>
-        </button>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- Modal de Histórico -->
-  <div id="history-modal" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden" onclick="closeHistory()">
-    <div class="bg-white rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="font-bold text-lg flex items-center gap-2 text-black">
-          <i data-lucide="history" class="w-5 h-5"></i>
-          Histórico de Textos Salvos
-        </h2>
-        <button id="btn-close-history" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-200 rounded-lg transition-colors" onclick="closeHistory()">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      
-      <div id="history-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
-        <!-- Rendered by JS -->
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const generateId = () => Math.random().toString(36).substring(2, 9);
-
-    let boxes = [
-      { id: generateId(), text: "" },
-      { id: generateId(), text: "" },
-      { id: generateId(), text: "" }
-    ];
-    
-    let historyArray = [];
-    try {
-      historyArray = JSON.parse(localStorage.getItem('textJoinerHistory')) || [];
-    } catch (e) {}
-
-    let unionName = "Meus_Textos_Unidos";
-    let expandedBoxIds = [];
-    let expandedHistoryIds = [];
-
-    const ui = {
-      boxesContainer: document.getElementById('boxes-container'),
-      addBtn: document.getElementById('btn-add-box'),
-      boxCountBadge: document.getElementById('box-count-badge'),
-      unionNameInput: document.getElementById('input-union-name'),
-      combinedCharCount: document.getElementById('combined-char-count'),
-      combinedTextDisplay: document.getElementById('combined-text-display'),
-      emptyStateDisplay: document.getElementById('empty-state-display'),
-      btnCopy: document.getElementById('btn-copy'),
-      txtCopy: document.getElementById('txt-copy'),
-      btnDownload: document.getElementById('btn-download'),
-      btnOpenHistory: document.getElementById
-error
-The model's generation exceeded the maximum output token limit.
-Aqui está a versão completa em arquivo único HTML inline (usando Tailwind Play CDN), sem banco de dados, com localStorage, e as melhorias solicitadas:
-Correção do problema do teclado sumindo ao digitar (no React o campo não vai ser recriado).
-Botão de expandir/diminuir cada bloco, para ajudar na leitura pelo celular.
-Você pode apenas copiar e colar em um arquivo index.html e usar no seu GitHub Pages:
-code
-Html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unificador de Textos</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    /* Estilos base para garantir comportamento de scroll correto */
-    body { height: 100dvh; width: 100vw; margin: 0; overflow: hidden; }
-    textarea { outline: none; resize: none; }
-  </style>
+        /* Custom Scrollbar responsivo */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+    </style>
 </head>
-<body class="flex flex-col bg-[#F8F9FA] text-gray-900">
-
-  <!-- Header -->
-  <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm z-10">
-    <div class="flex items-center gap-3">
-      <div class="bg-black text-white p-1.5 rounded-lg flex items-center justify-center">
-        <i data-lucide="file-text" class="w-5 h-5"></i>
-      </div>
-      <h1 class="text-lg md:text-xl font-bold tracking-tight text-black">Unificador</h1>
-    </div>
-    <button onclick="openHistory()" class="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-black px-3 py-1.5 rounded-lg transition-colors border border-gray-200">
-      <i data-lucide="history" class="w-4 h-4"></i>
-      <span class="hidden sm:inline">Ver Histórico</span>
-    </button>
-  </header>
-
-  <!-- Área Principal -->
-  <main class="flex-1 min-h-0 flex flex-col md:flex-row w-full max-w-[1400px] mx-auto p-2 md:p-4 gap-2 md:gap-4 overflow-hidden">
-    
-    <!-- Esquerda -->
-    <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div class="shrink-0 px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
-        <span class="font-bold text-sm tracking-wide text-gray-700 uppercase flex items-center gap-2">
-          Partes do Texto
-          <span id="box-count" class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">3</span>
-        </span>
-        <button onclick="addBox()" class="flex items-center gap-1 text-xs font-bold text-white bg-black hover:bg-gray-800 px-2.5 py-1.5 rounded transition-colors">
-          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
-        </button>
-      </div>
-      
-      <div id="boxes-container" class="flex-1 min-h-0 p-2 overflow-y-auto flex flex-col gap-2 bg-white">
-        <!-- JS renderiza blocos aqui -->
-      </div>
-    </div>
-
-    <!-- Direita -->
-    <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-2 md:mt-0">
-      <div class="shrink-0 px-4 py-3 border-b border-gray-100 bg-black text-white flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2 flex-1">
-          <i data-lucide="align-left" class="w-4 h-4 shrink-0"></i>
-          <input type="text" id="union-name" value="Meus_Textos_Unidos" placeholder="Nome da união" class="bg-transparent border-b border-transparent focus:border-gray-500 w-full outline-none font-bold text-sm transition-colors placeholder:text-gray-400">
+<body class="text-gray-900">
+    <!-- Header Fixo e Compacto -->
+    <header class="shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm z-10">
+        <div class="flex items-center gap-3">
+            <div class="bg-black text-white p-1.5 rounded-lg flex items-center justify-center">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <h1 class="text-lg md:text-xl font-bold tracking-tight text-black">Unificador de Textos</h1>
         </div>
-        <span id="char-count" class="text-xs font-mono bg-gray-800 px-2 py-0.5 rounded text-gray-300 shrink-0">0 caracteres</span>
-      </div>
-
-      <div class="flex-1 min-h-0 p-4 overflow-y-auto bg-gray-50 flex flex-col">
-        <div id="combined-display" class="flex-1 text-sm font-mono text-gray-800 whitespace-pre-wrap leading-relaxed hidden"></div>
-        <div id="empty-state" class="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
-          <i data-lucide="file-text" class="w-8 h-8 text-gray-300"></i>
-          <p class="text-sm font-medium text-center">Os textos unidos aparecerão aqui...</p>
-        </div>
-      </div>
-
-      <div class="shrink-0 p-3 bg-white border-t border-gray-200 grid grid-cols-2 gap-2">
-        <button id="btn-copy" onclick="handleCopy()" class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all bg-gray-100 text-gray-400 cursor-not-allowed">
-          <i data-lucide="copy" class="w-4 h-4"></i>
-          <span id="txt-copy" class="truncate">Copiar</span>
+        <button onclick="openHistory()" class="flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 hover:text-black px-3 py-1.5 rounded-lg transition-colors border border-gray-200 focus:outline-none focus:ring-2 focus:ring-black">
+            <i data-lucide="history" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Ver Histórico</span>
         </button>
-        <button id="btn-download" onclick="handleDownload()" class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all bg-gray-50 text-gray-300 cursor-not-allowed">
-          <i data-lucide="download" class="w-4 h-4"></i>
-          <span class="truncate">Baixar .txt</span>
-        </button>
-      </div>
-    </div>
-  </main>
+    </header>
 
-  <!-- Modal Histórico -->
-  <div id="modal-history" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden" onclick="closeHistory()">
-    <div class="bg-white rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden" onclick="event.stopPropagation()">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 class="font-bold text-lg flex items-center gap-2 text-black">
-          <i data-lucide="history" class="w-5 h-5"></i> Histórico de Textos
-        </h2>
-        <button onclick="closeHistory()" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-200 rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <div id="history-container" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
-    </div>
-  </div>
-
-  <script>
-    const generateId = () => Math.random().toString(36).substring(2, 9);
-
-    let boxes = [
-      { id: generateId(), text: "" },
-      { id: generateId(), text: "" },
-      { id: generateId(), text: "" }
-    ];
-    let historyData = JSON.parse(localStorage.getItem('unificador_history') || '[]');
-    let expandedBoxes = [];
-    let expandedHistory = [];
-
-    const saveHistoryToStorage = () => localStorage.setItem('unificador_history', JSON.stringify(historyData));
-
-    function renderBoxes() {
-      const container = document.getElementById('boxes-container');
-      container.innerHTML = '';
-      document.getElementById('box-count').innerText = boxes.length;
-
-      boxes.forEach((box, index) => {
-        const isExp = expandedBoxes.includes(box.id);
-        const div = document.createElement('div');
-        div.className = `bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:border-black flex flex-col transition-all duration-200 ${isExp ? 'h-[400px] flex-none' : 'flex-1 min-h-[90px]'}`;
+    <!-- Área Principal sem scroll vertical na tela inteira -->
+    <main class="flex-1 min-h-0 flex flex-col md:flex-row w-full max-w-[1400px] mx-auto p-2 md:p-4 gap-2 md:gap-4 overflow-hidden">
         
-        div.innerHTML = `
-          <div class="shrink-0 bg-gray-50 py-1.5 px-3 border-b border-gray-100 flex justify-between items-center">
-            <div class="flex items-center gap-2">
-              <button onclick="toggleBoxExpand('${box.id}')" class="text-gray-500 hover:text-black">
-                <i data-lucide="${isExp ? 'minimize-2' : 'maximize-2'}" class="w-3.5 h-3.5"></i>
-              </button>
-              <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Bloco ${index + 1}</span>
-              <span class="text-[10px] font-mono bg-gray-200 px-1.5 py-0.5 rounded text-gray-600 font-bold">${box.text.length} char</span>
+        <!-- Coluna Esquerda: Entradas de Texto -->
+        <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+            <div class="shrink-0 px-4 py-2 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+                <span class="font-bold text-sm tracking-wide text-gray-700 uppercase flex items-center gap-2">
+                    Partes do Texto
+                    <span id="boxesCount" class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">3</span>
+                </span>
+                <button onclick="addBox()" class="flex items-center gap-1 text-xs font-bold text-white bg-black hover:bg-gray-800 px-2.5 py-1.5 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-black">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Adicionar
+                </button>
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="clearBox('${box.id}')" class="text-gray-400 hover:text-black"><i data-lucide="eraser" class="w-3.5 h-3.5"></i></button>
-              <button onclick="removeBox('${box.id}')" class="text-gray-400 hover:text-black"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            
+            <div id="boxesContainer" class="flex-1 min-h-0 p-2 overflow-y-auto flex flex-col gap-2 bg-white">
+                <!-- Caixas de texto renderizadas dinamicamente via JS -->
             </div>
-          </div>
-          <textarea id="ta-${box.id}" oninput="updateText('${box.id}', this.value)" placeholder="Digite aqui..." class="flex-1 w-full p-2 lg:p-3 resize-none outline-none text-gray-800 text-sm leading-relaxed">${box.text}</textarea>
-        `;
-        container.appendChild(div);
-      });
-      lucide.createIcons();
-      updateResult();
-    }
+        </div>
 
-    function getCombinedText() { return boxes.map(b => b.text).filter(t => t.trim() !== "").join("\n\n"); }
-
-    function updateResult() {
-      const combined = getCombinedText();
-      const hasText = combined.length > 0;
-      
-      document.getElementById('char-count').innerText = `${combined.length} caracteres`;
-      document.getElementById('combined-display').innerText = combined;
-      document.getElementById('combined-display').classList.toggle('hidden', !hasText);
-      document.getElementById('empty-state').classList.toggle('hidden', hasText);
-
-      // Atualiza estado dos botões
-      const btnClassAct = "bg-white text-black hover:bg-gray-50 border-gray-300 shadow-sm border";
-      const btnClassDis = "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed border";
-      
-      const btnC = document.getElementById('btn-copy');
-      const btnD = document.getElementById('btn-download');
-      
-      btnC.className = `flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all px-1 ${hasText ? 'bg-white border text-black hover:bg-gray-50' : btnClassDis}`;
-      btnD.className = `flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all px-1 ${hasText ? btnClassAct : btnClassDis}`;
-      
-      btnC.disabled = !hasText;
-      btnD.disabled = !hasText;
-    }
-
-    function addBox() { boxes.push({ id: generateId(), text: "" }); renderBoxes(); }
-    function removeBox(id) { 
-      if(boxes.length <= 1) { boxes = [{ id: generateId(), text: "" }]; }
-      else { boxes = boxes.filter(b => b.id !== id); }
-      renderBoxes(); 
-    }
-    function clearBox(id) { 
-      boxes = boxes.map(b => b.id === id ? {...b, text: ""} : b);
-      // Evita renderizar a lista inteira e fechar o teclado no celular atualizando direto o box
-      document.getElementById(`ta-${id}`).value = ''; 
-      updateResult();
-    }
-    function updateText(id, val) {
-      boxes = boxes.map(b => b.id === id ? {...b, text: val} : b);
-      updateResult();
-    }
-    function toggleBoxExpand(id) {
-      if(expandedBoxes.includes(id)) expandedBoxes = expandedBoxes.filter(x => x !== id);
-      else expandedBoxes.push(id);
-      renderBoxes();
-    }
-
-    function saveToHistory() {
-      const unionName = document.getElementById('union-name').value;
-      const combined = getCombinedText();
-      if(!combined) return;
-
-      if(historyData.length > 0) {
-        const latest = historyData[0].boxes.map(b => b.text).filter(t => t.trim() !== "").join("\n\n");
-        if(latest === combined && historyData[0].name === unionName) return;
-      }
-      historyData.unshift({ id: generateId(), name: unionName, boxes: JSON.parse(JSON.stringify(boxes)), timestamp: Date.now() });
-      saveHistoryToStorage();
-    }
-
-    function handleCopy() {
-      navigator.clipboard.writeText(getCombinedText());
-      document.getElementById('txt-copy').innerText = "Copiado!";
-      saveToHistory();
-      setTimeout(() => { document.getElementById('txt-copy').innerText = "Copiar"; }, 2000);
-    }
-    function handleDownload() {
-      const name = document.getElementById('union-name').value || "documento";
-      const blob = new Blob([getCombinedText()], { type: "text/plain;charset=utf-8" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `${name}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      saveToHistory();
-    }
-
-    // Modal Histórico
-    function openHistory() {
-      document.getElementById('modal-history').classList.remove('hidden');
-      document.getElementById('modal-history').classList.add('flex');
-      renderHistory();
-    }
-    function closeHistory() {
-      document.getElementById('modal-history').classList.add('hidden');
-      document.getElementById('modal-history').classList.remove('flex');
-    }
-    
-    function toggleHistoryExpand(id, e) {
-      e.stopPropagation();
-      if(expandedHistory.includes(id)) expandedHistory = expandedHistory.filter(x => x !== id);
-      else expandedHistory.push(id);
-      renderHistory();
-    }
-    
-    function deleteHistory(id, e) {
-      e.stopPropagation();
-      if(confirm('Excluir texto histórico?')){
-        historyData = historyData.filter(h => h.id !== id);
-        saveHistoryToStorage();
-        renderHistory();
-      }
-    }
-    
-    function restoreHistory(id, e) {
-      e.stopPropagation();
-      const item = historyData.find(h => h.id === id);
-      if(item) {
-        boxes = JSON.parse(JSON.stringify(item.boxes));
-        document.getElementById('union-name').value = item.name || "Meus_Textos";
-        closeHistory();
-        renderBoxes();
-      }
-    }
-
-    function renderHistory() {
-      const c = document.getElementById('history-container');
-      c.innerHTML = '';
-      if(historyData.length === 0){
-        c.innerHTML = `<div class="flex flex-col items-center py-12 text-gray-400 gap-4"><i data-lucide="clock" class="w-10 h-10"></i><p>Nenhum histórico.</p></div>`;
-      } else {
-        historyData.forEach(h => {
-          const isExp = expandedHistory.includes(h.id);
-          const fullText = h.boxes.map(b => b.text).filter(t => t.trim() !== "").join("\n\n");
-          
-          c.innerHTML += `
-            <div class="border border-gray-200 rounded-xl p-4 bg-white relative overflow-hidden">
-              <div class="flex justify-between items-start mb-2">
-                <div class="flex flex-col gap-1">
-                  <span class="font-bold text-sm text-gray-800">${h.name || 'Sem nome'}</span>
-                  <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md flex items-center gap-1 w-max">
-                    <i data-lucide="clock" class="w-3 h-3"></i> ${new Date(h.timestamp).toLocaleString()}
-                  </span>
+        <!-- Coluna Direita: Resultado -->
+        <div class="flex-1 min-h-0 flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mt-2 md:mt-0">
+            <div class="shrink-0 px-4 py-3 border-b border-gray-100 bg-black text-white flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2 flex-1">
+                    <i data-lucide="align-left" class="w-4 h-4 shrink-0"></i>
+                    <input type="text" id="unionName" value="Meus_Textos_Unidos" placeholder="Nome do arquivo..." class="bg-transparent border-b border-transparent focus:border-gray-500 w-full outline-none font-bold text-sm transition-colors placeholder:text-gray-400">
                 </div>
-                <div class="flex gap-2">
-                  <button onclick="deleteHistory('${h.id}', event)" class="p-1.5 text-gray-400 hover:text-red-500 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                  <button onclick="restoreHistory('${h.id}', event)" class="text-xs font-bold bg-black text-white px-3 py-1.5 rounded-lg">Restaurar</button>
-                </div>
-              </div>
-              <div class="mt-3">
-                <p class="text-sm text-gray-700 font-medium leading-relaxed ${isExp ? 'whitespace-pre-wrap' : 'line-clamp-3'}">${fullText || 'Vazio'}</p>
-                ${fullText.length > 150 ? `<button onclick="toggleHistoryExpand('${h.id}', event)" class="text-xs font-bold text-gray-500 hover:text-black mt-2 bg-gray-100 px-2 py-1 rounded">${isExp ? 'Ver menos' : 'Ver mais'}</button>` : ''}
-              </div>
+                <span id="totalChars" class="text-xs font-mono bg-gray-800 px-2 py-0.5 rounded text-gray-300 shrink-0">0 caracteres</span>
             </div>
-          `;
-        });
-      }
-      lucide.createIcons();
-    }
 
-    // Init
-    document.getElementById('union-name').addEventListener('input', () => {});
-    renderBoxes();
-  </script>
+            <div class="flex-1 min-h-0 p-4 overflow-y-auto bg-gray-50 flex flex-col">
+                <div id="combinedTextDisplay" class="flex-1 text-sm font-mono text-gray-800 whitespace-pre-wrap leading-relaxed outline-none hidden"></div>
+                <div id="emptyDisplay" class="flex-1 flex flex-col items-center justify-center text-gray-400 gap-3">
+                    <i data-lucide="file-text" class="w-8 h-8 text-gray-300"></i>
+                    <p class="text-sm font-medium text-center">Os textos unidos aparecerão aqui...</p>
+                </div>
+            </div>
+
+            <div class="shrink-0 p-3 bg-white border-t border-gray-200 grid grid-cols-2 gap-2">
+                <button id="copyBtn" onclick="handleCopy()" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span id="copyText" class="truncate">Copiar</span>
+                </button>
+                <button id="downloadBtn" onclick="handleDownload()" disabled class="flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all border outline-none focus:ring-2 focus:ring-black px-1 bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span class="truncate">Baixar .txt</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Histórico -->
+    <div id="historyModal" class="fixed inset-0 z-50 items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden" onclick="closeHistoryModal(event)">
+        <div class="bg-white rounded-2xl w-full max-w-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gray-50">
+                <h2 class="font-bold text-lg flex items-center gap-2 text-black">
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                    Histórico de Textos Salvos
+                </h2>
+                <button onclick="closeHistory()" class="p-1.5 text-gray-500 hover:text-black hover:bg-gray-200 rounded-lg transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="historyContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white">
+                <!-- Itens do histórico aparecem aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Javascript -->
+    <script>
+        // Estado inicial do aplicativo
+        let boxes = [
+            { id: generateId(), text: '' },
+            { id: generateId(), text: '' },
+            { id: generateId(), text: '' }
+        ];
+        let historyData = [];
+        let expandedHistoryIds = [];
+
+        // Referências do DOM
+        const boxesContainer = document.getElementById('boxesContainer');
+        const boxesCount = document.getElementById('boxesCount');
+        const totalChars = document.getElementById('totalChars');
+        const combinedTextDisplay = document.getElementById('combinedTextDisplay');
+        const emptyDisplay = document.getElementById('emptyDisplay');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyText = document.getElementById('copyText');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const unionNameInput = document.getElementById('unionName');
+        const historyModal = document.getElementById('historyModal');
+        const historyContainer = document.getElementById('historyContainer');
+
+        // Utilitários
+        function generateId() {
+            return Math.random().toString(36).substring(2, 9);
+        }
+
+        // Inicializar aplicação
+        function init() {
+            const savedHistory = localStorage.getItem('textJoinerHistory');
+            if (savedHistory) {
+                try { historyData = JSON.parse(savedHistory); } catch(e) {}
+            }
+            renderBoxes();
+            updateCombinedText();
+        }
+
+        // Renderiza as caixas da esquerda
+        function renderBoxes() {
+            boxesCount.innerText = boxes.length;
+            boxesContainer.innerHTML = '';
+            
+            boxes.forEach((box, index) => {
+                const boxEl = document.createElement('div');
+                boxEl.className = 'flex-1 min-h-[90px] flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black shadow-sm shrink-0';
+                boxEl.innerHTML = `
+                    <div class="shrink-0 bg-gray-50 py-1.5 px-3 border-b border-gray-100 flex justify-between items-center transition-colors">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Bloco ${index + 1}</span>
+                            <span id="charCount-${box.id}" class="text-[10px] font-mono bg-gray-200 px-1.5 py-0.5 rounded text-gray-600 font-bold">${box.text.length} caracteres</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="clearBox('${box.id}')" class="text-gray-400 hover:text-black transition-colors" title="Esvaziar">
+                                <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="removeBox('${box.id}')" class="text-gray-400 hover:text-black transition-colors" title="Remover">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="textarea-${box.id}" oninput="handleTextChange('${box.id}', this.value)" placeholder="Digite ou cole um texto aqui..." class="flex-1 w-full p-2 lg:p-3 resize-none outline-none text-gray-800 text-sm leading-relaxed">${box.text}</textarea>
+                `;
+                boxesContainer.appendChild(boxEl);
+            });
+            lucide.createIcons();
+        }
+
+        // Ações das caixas
+        function addBox() {
+            boxes.push({ id: generateId(), text: '' });
+            renderBoxes();
+            updateCombinedText();
+            // Desce o scroll automaticamente quando adiciona nova caixa
+            setTimeout(() => { boxesContainer.scrollTop = boxesContainer.scrollHeight; }, 10);
+        }
+
+        function removeBox(id) {
+            if (boxes.length <= 1) {
+                boxes = [{ id: generateId(), text: '' }];
+            } else {
+                boxes = boxes.filter(b => b.id !== id);
+            }
+            renderBoxes();
+            updateCombinedText();
+        }
+
+        function clearBox(id) {
+            const box = boxes.find(b => b.id === id);
+            if (box) {
+                box.text = '';
+                document.getElementById(`textarea-${id}`).value = '';
+                document.getElementById(`charCount-${id}`).innerText = '0 caracteres';
+                updateCombinedText();
+            }
+        }
+
+        // Isso roda sem re-renderizar todo o layout, evitando a perda de foco no teclado do mobile
+        function handleTextChange(id, newText) {
+            const box = boxes.find(b => b.id === id);
+            if (box) {
+                box.text = newText;
+                document.getElementById(`charCount-${id}`).innerText = `${newText.length} caracteres`;
+                updateCombinedText();
+            }
+        }
+
+        // Sincronização do texto unificado
+        function getCombinedText() {
+            return boxes.map(b => b.text).filter(t => t.trim() !== "").join('\n\n');
+        }
+
+        function updateCombinedText() {
+            const combined = getCombinedText();
+            const btnActiveClasses = "bg-white text-black hover:bg-gray-50 border-gray-300 shadow-sm".split(" ");
+            const btnInactiveClasses = "bg-gray-50 text-gray-300 border-gray-100 cursor-not-allowed".split(" ");
+
+            if (combined.length > 0) {
+                combinedTextDisplay.innerText = combined;
+                combinedTextDisplay.classList.remove('hidden');
+                emptyDisplay.classList.add('hidden');
+                totalChars.innerText = combined.length + " caracteres";
+                
+                // Ativar botões
+                [copyBtn, downloadBtn].forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove(...btnInactiveClasses);
+                    btn.classList.add(...btnActiveClasses);
+                });
+            } else {
+                combinedTextDisplay.innerText = '';
+                combinedTextDisplay.classList.add('hidden');
+                emptyDisplay.classList.remove('hidden');
+                totalChars.innerText = "0 caracteres";
+                
+                // Desativar botões
+                [copyBtn, downloadBtn].forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.remove(...btnActiveClasses);
+                    btn.classList.add(...btnInactiveClasses);
+                });
+            }
+        }
+
+        // Ações de salvar, exportar e histórico
+        function saveToHistory() {
+            const combined = getCombinedText();
+            if (!combined) return;
+            const unionName = unionNameInput.value || "Meus_Textos_Unidos";
+            
+            // Evita salvar duplicados se acabar tocando 2x ou abaixando o mesmo arquivo repetidas vezes
+            if (historyData.length > 0) {
+                const latestTextList = historyData[0].boxes.map(b => b.text).filter(t => t.trim() !== "");
+                const latestCombined = latestTextList.join('\n\n');
+                if (combined === latestCombined && historyData[0].name === unionName) return;
+            }
+
+            historyData.unshift({
+                id: generateId(),
+                name: unionName,
+                boxes: JSON.parse(JSON.stringify(boxes)),
+                timestamp: Date.now()
+            });
+            localStorage.setItem('textJoinerHistory', JSON.stringify(historyData));
+        }
+
+        function handleCopy() {
+            const combined = getCombinedText();
+            if (!combined) return;
+            
+            navigator.clipboard.writeText(combined).then(() => {
+                saveToHistory();
+                copyBtn.className = "flex flex-col xl:flex-row items-center justify-center gap-1 xl:gap-2 py-2 rounded-lg font-bold text-[11px] xl:text-sm transition-all focus:outline-none focus:ring-2 focus:ring-black px-1 bg-black text-white";
+                copyText.innerText = "Copiado!";
+                
+                setTimeout(() => {
+                    updateCombinedText(); // Retorna o botão ao normal
+                    copyText.innerText = "Copiar";
+                }, 2000);
+            });
+        }
+
+        function handleDownload() {
+            const combined = getCombinedText();
+            if (!combined) return;
+            
+            const blob = new Blob([combined], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = (unionNameInput.value || "documento_unificado") + ".txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            saveToHistory();
+        }
+
+        // Histórico de Textos (Modal)
+        function openHistory() {
+            renderHistory();
+            historyModal.classList.remove('hidden');
+            historyModal.classList.add('flex');
+        }
+
+        function closeHistory() {
+            historyModal.classList.add('hidden');
+            historyModal.classList.remove('flex');
+        }
+        
+        function closeHistoryModal(e) {
+            if(e.target === historyModal) closeHistory();
+        }
+
+        function renderHistory() {
+            historyContainer.innerHTML = '';
+            if (historyData.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-gray-400 gap-4">
+                        <i data-lucide="clock" class="w-10 h-10 text-gray-300"></i>
+                        <p class="text-center font-medium">
+                            Nenhuma unificação salva no momento.<br/>
+                            <span class="text-sm font-normal">Sempre que você copia ou salva um arquivo, ele fica guardado aqui.</span>
+                        </p>
+                    </div>
+                `;
+            } else {
+                historyData.forEach(item => {
+                    const fullText = item.boxes.map(b => b.text).filter(t => t.trim() !== "").join('\n\n');
+                    const isExpanded = expandedHistoryIds.includes(item.id);
+                    
+                    const el = document.createElement('div');
+                    el.className = `group border border-gray-200 rounded-xl p-4 hover:border-black transition-all bg-white hover:shadow-md relative overflow-hidden ${isExpanded ? '' : 'cursor-pointer'}`;
+                    
+                    if (!isExpanded) {
+                        el.onclick = (e) => {
+                            if (document.getElementById(`confirm-${item.id}`).classList.contains('flex')) return;
+                            restoreHistory(item.id, e);
+                        };
+                    }
+
+                    // Prevenir injeção de HTML no texto escapando as tags visuais
+                    const safeText = fullText ? fullText.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "Cópia vazia...";
+
+                    el.innerHTML = `
+                        <div id="confirm-${item.id}" class="absolute inset-0 bg-white/95 backdrop-blur-sm z-10 hidden flex-col justify-center items-center p-4">
+                            <p class="text-[13px] leading-tight font-bold text-gray-800 mb-3 text-center">Tem certeza que deseja excluir esse texto unificado?</p>
+                            <div class="flex gap-2">
+                                <button onclick="confirmDeleteHistory('${item.id}', event)" class="px-3 py-1.5 bg-black text-white text-[11px] font-bold rounded-lg hover:bg-red-600 transition-colors">Sim</button>
+                                <button onclick="cancelDeleteHistory('${item.id}', event)" class="px-3 py-1.5 bg-gray-200 text-black text-[11px] font-bold rounded-lg hover:bg-gray-300 transition-colors">Não</button>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-sm text-gray-800 mb-1">${item.name || 'Texto sem nome'}</span>
+                                <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md self-start flex items-center gap-1">
+                                    <i data-lucide="clock" class="w-3 h-3"></i>
+                                    ${new Date(item.timestamp).toLocaleString()}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="requestDeleteHistory('${item.id}', event)" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors opacity-100 sm:opacity-0 group-hover:opacity-100" title="Excluir">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="restoreHistory('${item.id}', event)" class="text-xs font-bold bg-black text-white px-3 py-1.5 rounded-lg opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    Restaurar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <p class="text-sm text-gray-700 font-medium leading-relaxed ${isExpanded ? 'whitespace-pre-wrap' : 'line-clamp-3'}">
+                                ${safeText}
+                            </p>
+                            ${fullText.length > 150 ? `
+                                <button onclick="toggleExpandHistory('${item.id}', event)" class="text-xs font-bold text-gray-500 hover:text-black mt-2 flex items-center bg-gray-100 px-2 py-1 rounded">
+                                    ${isExpanded ? "Ver menos" : "Ver mais"}
+                                </button>
+                            ` : ''}
+                        </div>
+
+                        <div class="mt-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1 border-t border-gray-100 pt-3">
+                            <i data-lucide="file-text" class="w-3 h-3"></i>
+                            ${item.boxes.length} Partes originais preservadas
+                        </div>
+                    `;
+                    historyContainer.appendChild(el);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function restoreHistory(id, e) {
+            if(e) e.stopPropagation();
+            const item = historyData.find(h => h.id === id);
+            if (item) {
+                boxes = JSON.parse(JSON.stringify(item.boxes));
+                unionNameInput.value = item.name || "Meus_Textos_Unidos";
+                renderBoxes();
+                updateCombinedText();
+                closeHistory();
+            }
+        }
+
+        function toggleExpandHistory(id, e) {
+            e.stopPropagation();
+            if (expandedHistoryIds.includes(id)) {
+                expandedHistoryIds = expandedHistoryIds.filter(i => i !== id);
+            } else {
+                expandedHistoryIds.push(id);
+            }
+            renderHistory();
+        }
+
+        function requestDeleteHistory(id, e) {
+            e.stopPropagation();
+            document.getElementById(`confirm-${id}`).classList.remove('hidden');
+            document.getElementById(`confirm-${id}`).classList.add('flex');
+        }
+
+        function cancelDeleteHistory(id, e) {
+            e.stopPropagation();
+            document.getElementById(`confirm-${id}`).classList.add('hidden');
+            document.getElementById(`confirm-${id}`).classList.remove('flex');
+        }
+
+        function confirmDeleteHistory(id, e) {
+            e.stopPropagation();
+            historyData = historyData.filter(h => h.id !== id);
+            localStorage.setItem('textJoinerHistory', JSON.stringify(historyData));
+            renderHistory();
+        }
+
+        // Inicializar
+        init();
+    </script>
 </body>
 </html>
